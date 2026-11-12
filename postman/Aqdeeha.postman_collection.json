@@ -1,0 +1,3006 @@
+{
+  "info": {
+    "name": "Aqdeeha — API",
+    "description": "Run folders top to bottom. Tokens and ids (courierId, categoryId, shopId) are saved automatically into collection variables. OTP codes are printed in the app console.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Terms & conditions",
+      "item": [
+        {
+          "name": "1. Current terms — customer (public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/terms?audience=CUSTOMER",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "terms"
+              ],
+              "query": [
+                {
+                  "key": "audience",
+                  "value": "CUSTOMER"
+                }
+              ]
+            },
+            "description": "Saves termsVersionId / termsVersion. Signup step 1 must send this version.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b = pm.response.json();",
+                  "if (b.id) { pm.collectionVariables.set('termsVersionId', b.id); pm.collectionVariables.set('termsVersion', b.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Current terms — courier (public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/terms?audience=COURIER",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "terms"
+              ],
+              "query": [
+                {
+                  "key": "audience",
+                  "value": "COURIER"
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "3. Accept current terms (logged in)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/terms/accept",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "terms",
+                "accept"
+              ]
+            },
+            "description": "Use after login / me returned user.termsUpToDate = false. Run request 1 first.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"termsVersionId\": \"{{termsVersionId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "4. Admin — terms history",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/terms?audience=CUSTOMER",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "terms"
+              ],
+              "query": [
+                {
+                  "key": "audience",
+                  "value": "CUSTOMER"
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "5. Super admin — publish new version",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/terms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "terms"
+              ]
+            },
+            "description": "Becomes current immediately; every customer must accept it again. Audited.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"audience\": \"CUSTOMER\",\n  \"content\": \"## ١. عن الخدمة\\nنص الشروط الجديد...\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customer signup",
+      "item": [
+        {
+          "name": "1. Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/customer/signup/send-otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "customer",
+                "signup",
+                "send-otp"
+              ]
+            },
+            "description": "The OTP is printed in the application console/log (look for the WHATSAPP (console) box). Put it in the collection variable `otp` (or edit the body) before running Verify.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{customerPhone}}\",\n  \"acceptTerms\": true,\n  \"termsVersion\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "2. Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/customer/signup/verify-otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "customer",
+                "signup",
+                "verify-otp"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{customerPhone}}\",\n  \"code\": \"{{otp}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.verificationToken) { pm.collectionVariables.set('verificationToken', j.verificationToken); console.log('saved verificationToken'); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Complete profile (form-data)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/customer/signup/complete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "customer",
+                "signup",
+                "complete"
+              ]
+            },
+            "description": "Body > form-data. For `photo` choose type File and pick an image (or untick it — it's optional). If Postman shows 'EISDIR: illegal operation on a directory', a ticked File row has no file selected: pick a file or untick the row.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "verificationToken",
+                  "value": "{{verificationToken}}",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "fullName",
+                  "value": "Ahmed Mohamed",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "password",
+                  "value": "{{customerPassword}}",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "birthDate",
+                  "value": "1998-05-20",
+                  "type": "text",
+                  "description": "yyyy-MM-dd"
+                },
+                {
+                  "key": "gender",
+                  "value": "male",
+                  "type": "text",
+                  "description": "male | female"
+                },
+                {
+                  "key": "email",
+                  "value": "ahmed@example.com",
+                  "type": "text",
+                  "description": "optional"
+                },
+                {
+                  "key": "photo",
+                  "type": "file",
+                  "description": "optional — jpg/png/webp, max 5 MB — click 'Select Files' to choose an image. To test a missing image, UNTICK this row (don't leave it ticked and empty).",
+                  "disabled": false
+                }
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.accessToken) { pm.collectionVariables.set('customerToken', j.accessToken); console.log('saved customerToken'); }"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Courier signup",
+      "item": [
+        {
+          "name": "1. Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/courier/signup/send-otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "courier",
+                "signup",
+                "send-otp"
+              ]
+            },
+            "description": "The OTP is printed in the application console/log (look for the WHATSAPP (console) box). Put it in the collection variable `otp` (or edit the body) before running Verify.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{courierPhone}}\",\n  \"acceptTerms\": true,\n  \"termsVersion\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "2. Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/courier/signup/verify-otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "courier",
+                "signup",
+                "verify-otp"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{courierPhone}}\",\n  \"code\": \"{{otp}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.verificationToken) { pm.collectionVariables.set('verificationToken', j.verificationToken); console.log('saved verificationToken'); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Complete profile (form-data)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/courier/signup/complete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "courier",
+                "signup",
+                "complete"
+              ]
+            },
+            "description": "Body > form-data. Pick an image file for each of the 4 File rows. Response has NO token: courier stays pending until approved. If Postman shows 'EISDIR: illegal operation on a directory', a ticked File row has no file selected: pick a file or untick the row.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "verificationToken",
+                  "value": "{{verificationToken}}",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "fullName",
+                  "value": "Mahmoud Ali",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "password",
+                  "value": "{{courierPassword}}",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "birthDate",
+                  "value": "1995-01-15",
+                  "type": "text",
+                  "description": "yyyy-MM-dd"
+                },
+                {
+                  "key": "address",
+                  "value": "Ezbet Sekina, Street 5",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "vehicleType",
+                  "value": "motorcycle",
+                  "type": "text",
+                  "description": "car | scooter | motorcycle | bicycle"
+                },
+                {
+                  "key": "vehicleColor",
+                  "value": "Black",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "plateNumber",
+                  "value": "ABC 123",
+                  "type": "text",
+                  "description": "optional"
+                },
+                {
+                  "key": "walletType",
+                  "value": "vodafone_cash",
+                  "type": "text",
+                  "description": "REQUIRED: vodafone_cash | instapay",
+                  "disabled": false
+                },
+                {
+                  "key": "walletNumber",
+                  "value": "01012345678",
+                  "type": "text",
+                  "description": "REQUIRED: Egyptian mobile; instapay also accepts name@instapay",
+                  "disabled": false
+                },
+                {
+                  "key": "photo",
+                  "type": "file",
+                  "description": "required — click 'Select Files' to choose an image. To test a missing image, UNTICK this row (don't leave it ticked and empty).",
+                  "disabled": false
+                },
+                {
+                  "key": "idCardFront",
+                  "type": "file",
+                  "description": "required — stored encrypted — click 'Select Files' to choose an image. To test a missing image, UNTICK this row (don't leave it ticked and empty).",
+                  "disabled": false
+                },
+                {
+                  "key": "idCardBack",
+                  "type": "file",
+                  "description": "required — stored encrypted — click 'Select Files' to choose an image. To test a missing image, UNTICK this row (don't leave it ticked and empty).",
+                  "disabled": false
+                },
+                {
+                  "key": "vehiclePhoto",
+                  "type": "file",
+                  "description": "required — click 'Select Files' to choose an image. To test a missing image, UNTICK this row (don't leave it ticked and empty).",
+                  "disabled": false
+                }
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login",
+      "item": [
+        {
+          "name": "Login — customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{customerPhone}}\",\n  \"password\": \"{{customerPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.accessToken) { pm.collectionVariables.set('customerToken', j.accessToken); console.log('saved customerToken'); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Me — customer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Forgot password",
+      "item": [
+        {
+          "name": "1. Forgot password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/password/forgot",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "password",
+                "forgot"
+              ]
+            },
+            "description": "The OTP is printed in the application console/log (look for the WHATSAPP (console) box). Put it in the collection variable `otp` (or edit the body) before running Verify.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{customerPhone}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "2. Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/password/verify-otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "password",
+                "verify-otp"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{customerPhone}}\",\n  \"code\": \"{{otp}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.verificationToken) { pm.collectionVariables.set('resetToken', j.verificationToken); console.log('saved resetToken'); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Reset password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/password/reset",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "password",
+                "reset"
+              ]
+            },
+            "description": "Revokes every token of this user. 'Me — customer' with the old token now returns 401. Log in with newPassword.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resetToken\": \"{{resetToken}}\",\n  \"newPassword\": \"{{newPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "1. Bootstrap super admin (one time)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Bootstrap-Key",
+                "value": "{{bootstrapKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/auth/bootstrap-super-admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "auth",
+                "bootstrap-super-admin"
+              ]
+            },
+            "description": "Works only while no super admin exists. Second call -> 409 SUPER_ADMIN_ALREADY_EXISTS forever.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Super Admin\",\n  \"email\": \"{{superAdminEmail}}\",\n  \"password\": \"{{superAdminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.accessToken) { pm.collectionVariables.set('superAdminToken', j.accessToken); console.log('saved superAdminToken'); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Login — super admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{superAdminEmail}}\",\n  \"password\": \"{{superAdminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.accessToken) { pm.collectionVariables.set('superAdminToken', j.accessToken); console.log('saved superAdminToken'); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Create admin (super admin only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/admins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "admins"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Admin One\",\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "4. Login — admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.accessToken) { pm.collectionVariables.set('adminToken', j.accessToken); console.log('saved adminToken'); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5. Me — admin",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "6. Create admin as normal admin (expect 403)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/admins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "admins"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"X\",\n  \"email\": \"x@example.com\",\n  \"password\": \"Passw0rd!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin — couriers",
+      "item": [
+        {
+          "name": "1. List pending couriers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/couriers?status=pending&q=&page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "couriers"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending",
+                  "description": "pending | approved | rejected | needs_fix",
+                  "disabled": false
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "description": "name or phone",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "0",
+                  "description": "",
+                  "disabled": false
+                },
+                {
+                  "key": "size",
+                  "value": "20",
+                  "description": "",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": "Saves the first courier's id into {{courierId}}.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "const v = (j.items && j.items.length) ? j.items[0].id : undefined;",
+                  "if (v !== undefined && v !== null) { pm.collectionVariables.set('courierId', v); console.log('saved courierId =', v); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Courier details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/couriers/{{courierId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "couriers",
+                "{{courierId}}"
+              ]
+            },
+            "description": "Saves the signed ID-card links (valid 5 minutes) into {{idCardFrontSignedUrl}} / {{idCardBackSignedUrl}}. Also shows wallet, resubmissionCount and the decision history.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.idCardFrontUrl !== undefined && j.idCardFrontUrl !== null) { pm.collectionVariables.set('idCardFrontSignedUrl', j.idCardFrontUrl); console.log('saved idCardFrontSignedUrl'); }",
+                  "if (j.idCardBackUrl !== undefined && j.idCardBackUrl !== null) { pm.collectionVariables.set('idCardBackSignedUrl', j.idCardBackUrl); console.log('saved idCardBackSignedUrl'); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. ID card — front (image)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/couriers/{{courierId}}/id-card/front",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "couriers",
+                "{{courierId}}",
+                "id-card",
+                "front"
+              ]
+            },
+            "description": "Returns the decrypted image. Postman shows it in the response body (Preview).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "4. ID card — back (image)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/couriers/{{courierId}}/id-card/back",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "couriers",
+                "{{courierId}}",
+                "id-card",
+                "back"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3b. ID card front — signed link (NO token, like <img src>)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{idCardFrontSignedUrl}}"
+            },
+            "description": "Run '2. Courier details' first (links expire after 5 minutes). No Authorization header — the signature is the permission.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "5. Approve",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/couriers/{{courierId}}/approval",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "couriers",
+                "{{courierId}}",
+                "approval"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"approved\",\n  \"note\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "6. Needs fix (note required)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/couriers/{{courierId}}/approval",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "couriers",
+                "{{courierId}}",
+                "approval"
+              ]
+            },
+            "description": "fields (required for needs_fix): fullName, birthDate, photo, address, vehicleType, vehicleColor, plateNumber, vehiclePhoto, idCardFront, idCardBack, wallet. The courier will see ONLY these. Stored as a notification (no WhatsApp).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"needs_fix\",\n  \"note\": \"صورة البطاقة من قدام مش واضحة، ورقم المحفظة غلط\",\n  \"fields\": [\n    \"idCardFront\",\n    \"wallet\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "7. Reject (note required)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/couriers/{{courierId}}/approval",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "couriers",
+                "{{courierId}}",
+                "approval"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"rejected\",\n  \"note\": \"البيانات مش مطابقة\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Courier app",
+      "item": [
+        {
+          "name": "1. Login — courier (phone + password)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "nextStep: null = home, 'fix_application' = needs_fix (limited token). Pending/rejected → 403.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{courierPhone}}\",\n  \"password\": \"{{courierPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.accessToken) { pm.collectionVariables.set('courierToken', j.accessToken); console.log('saved courierToken, nextStep =', j.nextStep); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2a. Fix access — send code (needs_fix)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/courier/fix/send-otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "courier",
+                "fix",
+                "send-otp"
+              ]
+            },
+            "description": "Courier asked to fix data enters the phone number. The code is printed in the app console. 409 NOTHING_TO_FIX if there is no fix request.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{courierPhone}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "2b. Fix access — verify code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/courier/fix/verify-otp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "courier",
+                "fix",
+                "verify-otp"
+              ]
+            },
+            "description": "Put the code in {{otp}} first. Returns the limited token (saved as courierToken).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{courierPhone}}\",\n  \"code\": \"{{otp}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.accessToken) { pm.collectionVariables.set('courierToken', j.accessToken); console.log('saved courierToken, nextStep =', j.nextStep); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Fields to fix",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/courier/application",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courier",
+                "application"
+              ]
+            },
+            "description": "ONLY the fields the admin flagged: label, inputType, formKeys (what to send), options, currentValue.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{courierToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "4. Resubmit (form-data)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/courier/application/resubmit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courier",
+                "application",
+                "resubmit"
+              ]
+            },
+            "description": "Tick exactly the formKeys returned by '3. Fields to fix'. All flagged fields are required; others are ignored. Goes back to pending.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "idCardFront",
+                  "type": "file",
+                  "description": "send if flagged — click 'Select Files'. To skip it, untick the row.",
+                  "disabled": false
+                },
+                {
+                  "key": "walletType",
+                  "value": "instapay",
+                  "type": "text",
+                  "description": "send if 'wallet' flagged",
+                  "disabled": false
+                },
+                {
+                  "key": "walletNumber",
+                  "value": "name@instapay",
+                  "type": "text",
+                  "description": "send if 'wallet' flagged",
+                  "disabled": false
+                },
+                {
+                  "key": "fullName",
+                  "value": "",
+                  "type": "text",
+                  "description": "if flagged",
+                  "disabled": true
+                },
+                {
+                  "key": "birthDate",
+                  "value": "",
+                  "type": "text",
+                  "description": "if flagged (yyyy-MM-dd)",
+                  "disabled": true
+                },
+                {
+                  "key": "address",
+                  "value": "",
+                  "type": "text",
+                  "description": "if flagged",
+                  "disabled": true
+                },
+                {
+                  "key": "vehicleType",
+                  "value": "",
+                  "type": "text",
+                  "description": "if flagged",
+                  "disabled": true
+                },
+                {
+                  "key": "vehicleColor",
+                  "value": "",
+                  "type": "text",
+                  "description": "if flagged",
+                  "disabled": true
+                },
+                {
+                  "key": "plateNumber",
+                  "value": "",
+                  "type": "text",
+                  "description": "if flagged",
+                  "disabled": true
+                },
+                {
+                  "key": "photo",
+                  "type": "file",
+                  "description": "if flagged — click 'Select Files'. To skip it, untick the row.",
+                  "disabled": true
+                },
+                {
+                  "key": "idCardBack",
+                  "type": "file",
+                  "description": "if flagged — click 'Select Files'. To skip it, untick the row.",
+                  "disabled": true
+                },
+                {
+                  "key": "vehiclePhoto",
+                  "type": "file",
+                  "description": "if flagged — click 'Select Files'. To skip it, untick the row.",
+                  "disabled": true
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{courierToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "5. Courier me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/courier/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courier",
+                "me"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{courierToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "6. Change wallet (approved courier)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/courier/wallet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courier",
+                "wallet"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"walletType\": \"vodafone_cash\",\n  \"walletNumber\": \"01012345678\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{courierToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "7. My notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{courierToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.notifications && j.notifications.items.length) pm.collectionVariables.set('notificationId', j.notifications.items[0].id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8. Mark notification read",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/{{notificationId}}/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "{{notificationId}}",
+                "read"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{courierToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Catalog — admin",
+      "item": [
+        {
+          "name": "1. Create category (form-data)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "categories"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "سمك",
+                  "type": "text",
+                  "description": "unique, 2-60 chars",
+                  "disabled": false
+                },
+                {
+                  "key": "iconKey",
+                  "value": "fish",
+                  "type": "text",
+                  "description": "predefined icon name; or upload 'icon' below (at least one)",
+                  "disabled": false
+                },
+                {
+                  "key": "icon",
+                  "type": "file",
+                  "description": "optional icon image jpg/png/webp ≤5MB — click 'Select Files'. To skip it, untick the row.",
+                  "disabled": true
+                },
+                {
+                  "key": "color",
+                  "value": "#1E88E5",
+                  "type": "text",
+                  "description": "#RRGGBB",
+                  "disabled": false
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "1",
+                  "type": "text",
+                  "description": "0-10000, default 0",
+                  "disabled": false
+                },
+                {
+                  "key": "isActive",
+                  "value": "true",
+                  "type": "text",
+                  "description": "default true",
+                  "disabled": false
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "const v = j.id;",
+                  "if (v !== undefined && v !== null) { pm.collectionVariables.set('categoryId', v); console.log('saved categoryId =', v); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. List categories (admin, incl. inactive)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "categories"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "2b. Get category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/categories/{{categoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "categories",
+                "{{categoryId}}"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "2c. Update category (form-data, PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/categories/{{categoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "categories",
+                "{{categoryId}}"
+              ]
+            },
+            "description": "Tick only the rows you want to change.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "أسماك",
+                  "type": "text",
+                  "description": "optional",
+                  "disabled": true
+                },
+                {
+                  "key": "iconKey",
+                  "value": "fish",
+                  "type": "text",
+                  "description": "optional; send empty to remove the key",
+                  "disabled": true
+                },
+                {
+                  "key": "icon",
+                  "type": "file",
+                  "description": "optional new icon image — click 'Select Files'. To skip it, untick the row.",
+                  "disabled": true
+                },
+                {
+                  "key": "removeIcon",
+                  "value": "true",
+                  "type": "text",
+                  "description": "optional: remove the uploaded image",
+                  "disabled": true
+                },
+                {
+                  "key": "color",
+                  "value": "#00897B",
+                  "type": "text",
+                  "description": "optional",
+                  "disabled": false
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "2",
+                  "type": "text",
+                  "description": "optional",
+                  "disabled": true
+                },
+                {
+                  "key": "isActive",
+                  "value": "true",
+                  "type": "text",
+                  "description": "optional",
+                  "disabled": true
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Create shop (form-data)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/shops",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "shops"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "سمك أبو علي",
+                  "type": "text",
+                  "description": "",
+                  "disabled": false
+                },
+                {
+                  "key": "categoryId",
+                  "value": "{{categoryId}}",
+                  "type": "text",
+                  "description": "",
+                  "disabled": false
+                },
+                {
+                  "key": "photo",
+                  "type": "file",
+                  "description": "required shop photo jpg/png/webp ≤5MB — click 'Select Files'. To skip it, untick the row.",
+                  "disabled": false
+                },
+                {
+                  "key": "street",
+                  "value": "شارع البحر، عزبة سكينة",
+                  "type": "text",
+                  "description": "",
+                  "disabled": false
+                },
+                {
+                  "key": "lat",
+                  "value": "31.2001234",
+                  "type": "text",
+                  "description": "",
+                  "disabled": false
+                },
+                {
+                  "key": "lng",
+                  "value": "29.9187654",
+                  "type": "text",
+                  "description": "",
+                  "disabled": false
+                },
+                {
+                  "key": "opensAt",
+                  "value": "09:00",
+                  "type": "text",
+                  "description": "HH:mm Cairo time",
+                  "disabled": false
+                },
+                {
+                  "key": "closesAt",
+                  "value": "23:00",
+                  "type": "text",
+                  "description": "HH:mm; earlier than opensAt = past midnight; equal = 24h",
+                  "disabled": false
+                },
+                {
+                  "key": "isOpen",
+                  "value": "true",
+                  "type": "text",
+                  "description": "manual switch, default true",
+                  "disabled": false
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "const v = j.id;",
+                  "if (v !== undefined && v !== null) { pm.collectionVariables.set('shopId', v); console.log('saved shopId =', v); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4. List shops (admin, all categories)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/shops?categoryId={{categoryId}}&q=&page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "shops"
+              ],
+              "query": [
+                {
+                  "key": "categoryId",
+                  "value": "{{categoryId}}",
+                  "description": "optional",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "description": "name or street",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "0",
+                  "description": "",
+                  "disabled": false
+                },
+                {
+                  "key": "size",
+                  "value": "20",
+                  "description": "",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "5. Get shop (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/shops/{{shopId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "shops",
+                "{{shopId}}"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "6. Update shop (form-data, PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/shops/{{shopId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "shops",
+                "{{shopId}}"
+              ]
+            },
+            "description": "Tick only the rows you want to change.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "سمك أبو علي الجديد",
+                  "type": "text",
+                  "description": "optional",
+                  "disabled": true
+                },
+                {
+                  "key": "categoryId",
+                  "value": "{{categoryId}}",
+                  "type": "text",
+                  "description": "optional",
+                  "disabled": true
+                },
+                {
+                  "key": "photo",
+                  "type": "file",
+                  "description": "optional new photo — click 'Select Files'. To skip it, untick the row.",
+                  "disabled": true
+                },
+                {
+                  "key": "street",
+                  "value": "",
+                  "type": "text",
+                  "description": "optional",
+                  "disabled": true
+                },
+                {
+                  "key": "lat",
+                  "value": "",
+                  "type": "text",
+                  "description": "optional",
+                  "disabled": true
+                },
+                {
+                  "key": "lng",
+                  "value": "",
+                  "type": "text",
+                  "description": "optional",
+                  "disabled": true
+                },
+                {
+                  "key": "opensAt",
+                  "value": "10:00",
+                  "type": "text",
+                  "description": "optional HH:mm",
+                  "disabled": false
+                },
+                {
+                  "key": "closesAt",
+                  "value": "01:00",
+                  "type": "text",
+                  "description": "optional HH:mm",
+                  "disabled": false
+                },
+                {
+                  "key": "isOpen",
+                  "value": "true",
+                  "type": "text",
+                  "description": "optional",
+                  "disabled": true
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "7. Delete shop",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/shops/{{shopId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "shops",
+                "{{shopId}}"
+              ]
+            },
+            "description": "Soft delete (kept for history). 204.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "8. Delete category",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/categories/{{categoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "categories",
+                "{{categoryId}}"
+              ]
+            },
+            "description": "409 CATEGORY_HAS_SHOPS while it still has shops. Soft delete; the name can be reused.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Catalog — app",
+      "item": [
+        {
+          "name": "1. Categories (active, sorted)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categories"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. Shops by category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/shops?categoryId={{categoryId}}&q=&page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shops"
+              ],
+              "query": [
+                {
+                  "key": "categoryId",
+                  "value": "{{categoryId}}",
+                  "description": "",
+                  "disabled": false
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "description": "search name or street",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "0",
+                  "description": "",
+                  "disabled": false
+                },
+                {
+                  "key": "size",
+                  "value": "20",
+                  "description": "",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Shop by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/shops/{{shopId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shops",
+                "{{shopId}}"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Application config (admin)",
+      "description": "Business values (fees, commission, points, service area). Admins read; only the super admin changes. Set the 3 service_area_* keys first — quotes return 503 SERVICE_AREA_NOT_CONFIGURED until then.",
+      "item": [
+        {
+          "name": "1. List config (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/config",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. Set service area lat (super admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/config/service_area_lat",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "service_area_lat"
+              ]
+            },
+            "description": "Put the real centre of Ezbet Sekina.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": \"30.0000000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "3. Set service area lng (super admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/config/service_area_lng",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "service_area_lng"
+              ]
+            },
+            "description": "Put the real centre of Ezbet Sekina.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": \"31.0000000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "4. Set service area radius km (super admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/config/service_area_radius_km",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "service_area_radius_km"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": \"3\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "5. Change commission rate (super admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/config/commission_rate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "config",
+                "commission_rate"
+              ]
+            },
+            "description": "Audited as config.updated. Takes effect immediately.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{superAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": \"20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders — quote (customer)",
+      "description": "Price preview. Dropoff must be inside the service area.",
+      "item": [
+        {
+          "name": "1. Quote — shops (fixed price)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders/quote",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "quote"
+              ]
+            },
+            "description": "fee = base_fee + extra_shop_fee x (shops - 1)",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"shops\",\n  \"shopIds\": [\n    \"{{shopId}}\"\n  ],\n  \"dropoffLat\": 30.0,\n  \"dropoffLng\": 31.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "2. Quote — anything, no pickup (15..30)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders/quote",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "quote"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"anything\",\n  \"dropoffLat\": 30.0,\n  \"dropoffLng\": 31.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "3. Quote — anything with pickup (road distance)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders/quote",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "quote"
+              ]
+            },
+            "description": "Google Distance Matrix. Without GOOGLE_MAPS_API_KEY the distance is ESTIMATED (Haversine x 1.3).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"anything\",\n  \"pickupLat\": 30.02,\n  \"pickupLng\": 31.02,\n  \"dropoffLat\": 30.0,\n  \"dropoffLng\": 31.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "customerPhone",
+      "value": "01012345678"
+    },
+    {
+      "key": "courierPhone",
+      "value": "01112345678"
+    },
+    {
+      "key": "customerPassword",
+      "value": "Passw0rd!"
+    },
+    {
+      "key": "courierPassword",
+      "value": "Passw0rd!"
+    },
+    {
+      "key": "newPassword",
+      "value": "NewPassw0rd#"
+    },
+    {
+      "key": "otp",
+      "value": ""
+    },
+    {
+      "key": "verificationToken",
+      "value": ""
+    },
+    {
+      "key": "resetToken",
+      "value": ""
+    },
+    {
+      "key": "customerToken",
+      "value": ""
+    },
+    {
+      "key": "courierToken",
+      "value": ""
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "superAdminToken",
+      "value": ""
+    },
+    {
+      "key": "bootstrapKey",
+      "value": "fe37YYrCukNDEKRipfF8bLs3tJZtgAjy"
+    },
+    {
+      "key": "superAdminEmail",
+      "value": "super@aqdeeha.com"
+    },
+    {
+      "key": "superAdminPassword",
+      "value": "Sup3rAdmin!"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin1@aqdeeha.com"
+    },
+    {
+      "key": "adminPassword",
+      "value": "Adm1nPass!"
+    },
+    {
+      "key": "courierId",
+      "value": ""
+    },
+    {
+      "key": "categoryId",
+      "value": ""
+    },
+    {
+      "key": "shopId",
+      "value": ""
+    },
+    {
+      "key": "idCardFrontSignedUrl",
+      "value": ""
+    },
+    {
+      "key": "idCardBackSignedUrl",
+      "value": ""
+    },
+    {
+      "key": "notificationId",
+      "value": ""
+    },
+    {
+      "key": "termsVersionId",
+      "value": ""
+    },
+    {
+      "key": "termsVersion",
+      "value": "1"
+    }
+  ]
+}

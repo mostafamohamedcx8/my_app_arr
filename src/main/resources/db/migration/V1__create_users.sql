@@ -1,0 +1,26 @@
+-- Customers and couriers. Couriers also get a courier_profiles row.
+CREATE TABLE users (
+    id                  BIGINT       NOT NULL AUTO_INCREMENT,
+    role                VARCHAR(20)  NOT NULL,
+    phone               VARCHAR(20)  NOT NULL,
+    password_hash       VARCHAR(100) NOT NULL,
+    phone_verified_at   DATETIME(6)  NOT NULL,
+    terms_accepted_at   DATETIME(6)  NOT NULL,
+    name                VARCHAR(100) NOT NULL,
+    email               VARCHAR(150) NULL,
+    birth_date          DATE         NOT NULL,
+    gender              VARCHAR(10)  NULL,
+    photo_url           VARCHAR(255) NULL,
+    status              VARCHAR(20)  NOT NULL,
+    points              INT          NOT NULL DEFAULT 0,
+    password_changed_at DATETIME(6)  NULL,
+    last_login_at       DATETIME(6)  NULL,
+    created_at          DATETIME(6)  NOT NULL,
+    updated_at          DATETIME(6)  NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_users_phone UNIQUE (phone),
+    CONSTRAINT uk_users_email UNIQUE (email),
+    CONSTRAINT ck_users_role   CHECK (role IN ('customer', 'courier')),
+    CONSTRAINT ck_users_status CHECK (status IN ('active', 'pending', 'suspended', 'banned')),
+    CONSTRAINT ck_users_gender CHECK (gender IS NULL OR gender IN ('male', 'female'))
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

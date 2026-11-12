@@ -1,0 +1,23 @@
+# Production. Every value that varies or is secret MUST come from the environment.
+spring:
+  datasource:
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT:3306}/${DB_NAME}?serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8&sslMode=REQUIRED
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:20}
+      minimum-idle: 5
+  jpa:
+    show-sql: false
+
+logging:
+  level:
+    root: WARN
+    com.myapp.aqdeeha: INFO
+    org.flywaydb: INFO
+
+server:
+  forward-headers-strategy: framework
+  error:
+    include-message: never
+    include-stacktrace: never

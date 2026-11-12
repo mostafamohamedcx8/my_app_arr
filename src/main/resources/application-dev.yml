@@ -1,0 +1,5 @@
+
+
+app:
+  whatsapp:
+    provider: ${WHATSAPP_PROVIDER:console}   # switch to the real provider once it exists

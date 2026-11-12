@@ -1,0 +1,116 @@
+# ============================================================
+# Shared configuration — applies to every profile.
+# Profile-specific files override these values:
+#   application-local.yml  (developer machine, default)
+#   application-dev.yml    (shared dev/staging server)
+#   application-prod.yml   (production)
+# Activate with: SPRING_PROFILES_ACTIVE=dev  (or --spring.profiles.active=dev)
+# ============================================================
+spring:
+  application:
+    name: aqdeeha
+  profiles:
+    default: local
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      pool-name: aqdeeha-pool
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate          # schema is owned by Flyway — never let Hibernate change it
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+    validate-on-migrate: true
+    clean-disabled: true
+
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+
+  jackson:
+    time-zone: UTC
+
+  servlet:
+    multipart:
+      max-file-size: 5MB          # per image (matches app.storage.max-image-size)
+      max-request-size: 25MB      # courier signup sends 4 images
+
+  autoconfigure:
+    # We authenticate with our own JWTs; stop Boot from creating a default in-memory user/password.
+    exclude: org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
+
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+  tomcat:
+    # When an upload is rejected (e.g. > max-request-size), Tomcat must still read the rest of the body,
+    # otherwise it drops the connection and the client sees NO response instead of our 413 JSON error.
+    # Default is 2MB; keep it well above spring.servlet.multipart.max-request-size.
+    max-swallow-size: 100MB
+  error:
+    include-stacktrace: never
+    include-message: never
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:}   # browsers only (Expo web, admin dashboard); comma-separated
+  timezone:
+    storage: UTC
+    display: Africa/Cairo
+
+  security:
+    jwt:
+      secret: ${JWT_SECRET}           # base64, >= 32 bytes
+      issuer: aqdeeha
+      ttl: 30d
+    hash-pepper: ${HASH_PEPPER}       # >= 32 chars, used to HMAC OTP codes and tokens
+    bootstrap-key: ${BOOTSTRAP_KEY:}  # required header for the one-time super-admin bootstrap
+
+  otp:
+    length: 6
+    ttl: 5m
+    max-attempts: 5
+    resend-cooldown: 60s
+    max-per-phone-per-hour: 5
+    max-per-ip-per-hour: 20
+    verification-ttl: 15m
+
+  storage:
+    root: ${STORAGE_ROOT:./uploads}
+    id-card-key: ${ID_CARD_ENCRYPTION_KEY}   # base64 AES-256 key (32 bytes)
+    max-image-size: 5MB
+    public-url-prefix: /files/public
+    signed-url-ttl: 5m            # ID-card links for the dashboard <img> tags
+
+  whatsapp:
+    provider: ${WHATSAPP_PROVIDER}    # 'console' = print OTP to logs (dev only)
+
+  config:
+    cache-ttl: 30s                # application_config values are cached this long (evicted on change)
+
+  maps:
+    provider: ${MAPS_PROVIDER:google}   # 'google' = Distance Matrix (falls back to an estimate); tests use 'fake'
+    google:
+      api-key: ${GOOGLE_MAPS_API_KEY:}  # server-side only, never sent to the apps
+      base-url: https://maps.googleapis.com
+    timeout: 3s
+    cache-ttl: 24h                # road distances cached by coordinates rounded to 4 decimals
+    cache-max-size: 20000
+    fallback-road-factor: 1.3     # straight-line (Haversine) km × this when Google fails
